@@ -1,0 +1,200 @@
+products = [
+    {"id": 1, "name": "Laptop", "price": 25000, "stock": 5, "category": "Teknoloji"},
+    {"id": 2, "name": "Mouse", "price": 500, "stock": 10, "category": "Teknoloji"},
+    {"id": 3, "name": "Klavye", "price": 1200, "stock": 8, "category": "Teknoloji"},
+    {"id": 4, "name": "Kulaklık", "price": 2000, "stock": 6, "category": "Ses"},
+    {"id": 5, "name": "Monitör", "price": 7000, "stock": 4, "category": "Teknoloji"}
+]
+
+cart = []
+
+store_info = ("BT Shop", "Türkiye", "Console Mağaza")
+
+
+def show_products():
+    print("\n--- ÜRÜN LİSTESİ ---")
+    for product in products:
+        print(
+            str(product["id"]) + ". " +
+            product["name"] +
+            " | Fiyat: " + str(product["price"]) +
+            " TL | Stok: " + str(product["stock"]) +
+            " | Kategori: " + product["category"]
+        )
+
+
+def show_categories():
+    print("\n--- KATEGORİLER ---")
+    categories = set()
+
+    for product in products:
+        categories.add(product["category"])
+
+    for category in categories:
+        print(category)
+
+
+def find_product_by_id(product_id):
+    for product in products:
+        if product["id"] == product_id:
+            return product
+    return None
+
+
+def add_to_cart(product_id, quantity):
+    product = find_product_by_id(product_id)
+
+    if product is None:
+        return "Ürün bulunamadı."
+
+    if quantity <= 0:
+        return "Adet 0'dan büyük olmalıdır."
+
+    if quantity > product["stock"]:
+        return "Yeterli stok yok."
+
+    for item in cart:
+        if item["name"] == product["name"]:
+            item["quantity"] = item["quantity"] + quantity
+            product["stock"] = product["stock"] - quantity
+            return "Sepetteki ürün adedi güncellendi."
+
+    cart.append({
+        "name": product["name"],
+        "price": product["price"],
+        "quantity": quantity,
+        "category": product["category"]
+    })
+
+    product["stock"] = product["stock"] - quantity
+    return "Ürün sepete eklendi."
+
+
+def show_cart():
+    print("\n--- SEPET ---")
+
+    if len(cart) == 0:
+        print("Sepetiniz boş.")
+        return 0
+
+    total = 0
+
+    for item in cart:
+        item_total = item["price"] * item["quantity"]
+        total = total + item_total
+        print(
+            item["name"] + " - " +
+            str(item["quantity"]) + " adet - " +
+            str(item_total) + " TL"
+        )
+
+    print("Toplam:", total, "TL")
+    return total
+
+
+def remove_from_cart(product_name):
+    for i in range(len(cart)):
+        if cart[i]["name"].lower() == product_name.lower():
+            removed_item = cart[i]
+
+            for product in products:
+                if product["name"] == removed_item["name"]:
+                    product["stock"] = product["stock"] + removed_item["quantity"]
+
+            cart.pop(i)
+            return "Ürün sepetten çıkarıldı."
+
+    return "Sepette ürün bulunamadı."
+
+
+def save_order_to_file(customer_name, total_price):
+    try:
+        file = open("orders.txt", "a", encoding="utf-8")
+        file.write("Mağaza: " + store_info[0] + "\n")
+        file.write("Ülke: " + store_info[1] + "\n")
+        file.write("Müşteri: " + customer_name + "\n")
+        file.write("Ürünler:\n")
+
+        for item in cart:
+            file.write(
+                "- " + item["name"] +
+                " | Kategori: " + item["category"] +
+                " | Adet: " + str(item["quantity"]) +
+                " | Birim Fiyat: " + str(item["price"]) + " TL\n"
+            )
+
+        file.write("Toplam Tutar: " + str(total_price) + " TL\n")
+        file.write("-" * 40 + "\n")
+        file.close()
+        return "Sipariş dosyaya kaydedildi."
+    except Exception as error:
+        return "Dosyaya yazarken hata oluştu: " + str(error)
+
+
+def checkout():
+    if len(cart) == 0:
+        print("Sepetiniz boş.")
+        return
+
+    customer_name = input("Müşteri adını girin: ")
+    total_price = show_cart()
+    confirm = input("Siparişi onaylıyor musunuz? (evet/hayır): ").strip().lower()
+
+    if confirm == "evet":
+        result = save_order_to_file(customer_name, total_price)
+        print(result)
+        cart.clear()
+        print("Sipariş başarıyla tamamlandı.")
+    else:
+        print("Sipariş iptal edildi.")
+
+
+while True:
+    print("\n===== E-TİCARET MENÜSÜ =====")
+    print("Mağaza:", store_info[0])
+    print("1. Ürünleri Göster")
+    print("2. Kategorileri Göster")
+    print("3. Sepete Ürün Ekle")
+    print("4. Sepeti Göster")
+    print("5. Sepetten Ürün Çıkar")
+    print("6. Siparişi Tamamla")
+    print("7. Çıkış")
+
+    choice = input("Bir seçenek girin: ")
+
+    try:
+        if choice == "1":
+            show_products()
+
+        elif choice == "2":
+            show_categories()
+
+        elif choice == "3":
+            show_products()
+            product_id = int(input("Ürün id girin: "))
+            quantity = int(input("Adet girin: "))
+            result = add_to_cart(product_id, quantity)
+            print(result)
+
+        elif choice == "4":
+            show_cart()
+
+        elif choice == "5":
+            name = input("Sepetten çıkarmak istediğiniz ürün adı: ")
+            result = remove_from_cart(name)
+            print(result)
+
+        elif choice == "6":
+            checkout()
+
+        elif choice == "7":
+            print("Uygulamadan çıkılıyor...")
+            break
+
+        else:
+            print("Geçersiz seçim.")
+
+    except ValueError:
+        print("Lütfen gerekli alanlarda sayı girin.")
+    except Exception as error:
+        print("Beklenmeyen hata:", error)
