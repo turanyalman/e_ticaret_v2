@@ -65,16 +65,6 @@ python main.py
 6. Siparişi Tamamla
 7. Çıkış
 
-## Gelecekte Eklenebilecek Özellikler
-
-* OOP (Class) yapısına geçiş
-* JSON veri tabanı desteği
-* Kullanıcı giriş sistemi
-* Admin paneli
-* Ürün arama özelliği
-* Kategori filtreleme
-* İndirim ve kupon sistemi
-* GUI arayüzü (Tkinter veya PyQt)
 
 ## Geliştirici
 
